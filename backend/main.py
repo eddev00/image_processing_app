@@ -2,23 +2,22 @@ from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 import os
-from random import randint
-import uuid
 from shutil import copyfile
-
+import uuid
 from pydantic import BaseModel
+from edge_detection import process_edge_detection
 
 class ProcessImageRequest(BaseModel):
     filename: str
+    mode: str
 
 IMAGEDIR = "images/"
 PROCESSEDDIR = "processed/"
 
 app = FastAPI()
 
-# Configure CORS
 origins = [
-    "http://localhost:3000",  # React app origin
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
@@ -40,7 +39,6 @@ async def create_upload_file(file: UploadFile = File(...)):
     file.filename = f"{uuid.uuid4()}.jpg"
     contents = await file.read()
 
-    # Save the file
     with open(f"{IMAGEDIR}{file.filename}", "wb") as f:
         f.write(contents)
 
@@ -53,8 +51,6 @@ async def get_image(filename: str):
         raise HTTPException(status_code=404, detail="File not found")
     return FileResponse(file_path)
 
-
-
 @app.post("/process/")
 async def process_image(request: ProcessImageRequest):
     original_path = os.path.join(IMAGEDIR, request.filename)
@@ -63,10 +59,16 @@ async def process_image(request: ProcessImageRequest):
     if not os.path.exists(original_path):
         raise HTTPException(status_code=404, detail="Original file not found")
 
-    # For now, just copy the file to the processed directory
-    copyfile(original_path, processed_path)
+    if request.mode == 'Edge':
+        processed_path = os.path.join(PROCESSEDDIR, f"edge_{request.filename}")
+        processed_image_path = process_edge_detection(original_path, processed_path)
+        print(f"Edge-detected image saved at: {processed_image_path}")
+    else:
+        # For now, just copy the file to the processed directory for other modes
+        print(f"Copying {original_path} to {processed_path}")
+        copyfile(original_path, processed_path)
 
-    return {"processed_filename": request.filename}
+    return {"processed_filename": os.path.basename(processed_path)}
 
 @app.get("/processed/{filename}")
 async def get_processed_image(filename: str):

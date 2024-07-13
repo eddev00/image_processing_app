@@ -46,20 +46,20 @@ export default function Home() {
   const handleProcessClick = async () => {
     if (uploadedImage) {
       const filename = uploadedImage.split('/').pop();
-  
+
       try {
         const response = await fetch("http://localhost:8000/process/", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ filename: filename }),
+          body: JSON.stringify({ filename: filename, mode: mode.name }),
         });
-  
+
         if (!response.ok) {
           throw new Error("Error processing image");
         }
-  
+
         const data = await response.json();
         const processedImagePath = `http://localhost:8000/processed/${data.processed_filename}`;
         console.log("Processed image:", processedImagePath);

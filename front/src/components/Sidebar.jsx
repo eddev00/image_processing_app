@@ -70,6 +70,28 @@ const Sidebar = () => {
           </div>
         )}
       </div>
+      <div
+        className='mb-2 py-[12px] px-[16px] rounded-[10px] flex flex-col font-rubik font-medium text-[16px] button w-full bg-[#222143] gap-[16px] '
+        
+      >
+        <div  className="rounded-[10px] flex items-center w-full gap-[16px] cursor-pointer"
+        onClick={() => {
+            handleModeChange("Edge", "");
+            toggleMenu("Edge");
+          }}>
+          <Image src={icon1} alt="logo" />
+          <p>Edge detection</p>
+          <Image src={openMenu === "Upscale" ? arrowup : arrowdown} className='ml-auto' alt="arrow" />
+        </div>
+        {openMenu === "Edge" && (
+          <div className='grid grid-cols-2 gap-2'>
+            <div className="text-center bg-[#393957] p-2 rounded-[8px] cursor-pointer text-[14px] font-normal" onClick={() => handleModeChange("Edge","X2")}>X2</div>
+            <div className="text-center bg-[#393957] p-2 rounded-[8px] cursor-pointer text-[14px] font-normal" onClick={() => handleModeChange("Edge","X4")}>X4</div>
+            <div className="text-center bg-[#393957] p-2 rounded-[8px] cursor-pointer text-[14px] font-normal" onClick={() => handleModeChange("Edge","X2")}>X2</div>
+            <div className="text-center bg-[#393957] p-2 rounded-[8px] cursor-pointer text-[14px] font-normal" onClick={() => handleModeChange("Edge","X4")}>X4</div>
+          </div>
+        )}
+      </div>
 
       <div
         className='mb-2 py-[12px] px-[16px] rounded-[10px] flex flex-col font-rubik font-medium text-[16px] button w-full bg-[#222143] gap-[16px]'
