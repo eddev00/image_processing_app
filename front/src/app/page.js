@@ -1,17 +1,26 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 import { modeStore } from "../store/mode";
 import { imageStore } from "../store/image";
-
+import { prStore } from "../store/processed";
 export default function Home() {
   const [selectedImage, setSelectedImage] = useState(null);
-  const [uploadedImage, setUploadedImage] = useState(null);
-  const [processedImage, setProcessedImage] = useState(null);
+
+ 
   const mode = modeStore((state) => state.mode);
-  const imagePath = imageStore((state) => state.imagePath);
+  const imagePath = imageStore((state) => state.imagePath.path);
+  const processedImagePa = prStore((state) => state.pr.path);
   const updatePath = imageStore((state) => state.updatePath);
+  const updatePr = prStore((state) => state.updatePr);
+
+  useEffect(() => {
+    // Rerender when new imagePath
+    console.log("Image path updated:", imagePath);
+  }
+  , [imagePath, processedImagePa]);
+
 
   const handleImageUpload = async (event) => {
     const file = event.target.files[0];
@@ -34,38 +43,33 @@ export default function Home() {
 
         const data = await response.json();
         const uploadedImagePath = `http://localhost:8000/images/${data.filename}`;
-        setUploadedImage(uploadedImagePath);
+        
         updatePath(uploadedImagePath);
-        console.log("Uploaded image:", uploadedImagePath);
+        console.log("Uploaded image:", imagePath);
       } catch (error) {
         console.error("Error uploading image:", error);
       }
     }
   };
 
-  const handleProcessClick = async () => {
-    if (uploadedImage) {
-      const filename = uploadedImage.split('/').pop();
-
+  const handleDownload = async () => {
+    if (processedImagePa) {
       try {
-        const response = await fetch("http://localhost:8000/process/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ filename: filename, mode: mode.name }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Error processing image");
-        }
-
-        const data = await response.json();
-        const processedImagePath = `http://localhost:8000/processed/${data.processed_filename}`;
-        console.log("Processed image:", processedImagePath);
-        setProcessedImage(processedImagePath);
+        const response = await fetch(processedImagePa);
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+  
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'processed_image.jpg'); // Specify the file name here
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+  
+        // Clean up the object URL
+        URL.revokeObjectURL(url);
       } catch (error) {
-        console.error("Error processing image:", error);
+        console.error('Failed to download image:', error);
       }
     }
   };
@@ -126,13 +130,13 @@ export default function Home() {
       )}
    
 
-      {uploadedImage && (
+      {imagePath && (
         <div className="flex justify-center mt-4">
           <Image
-            src={uploadedImage}
+            src={imagePath}
             alt="Uploaded Image"
-            width={800}
-            height={400}
+            width={400}
+            height={200}
             className="rounded-lg"
           />
         </div>
@@ -143,21 +147,24 @@ export default function Home() {
       {mode.name && (
         <div className="text-white flex justify-between items-center">
           <p className="text-[24px] font-semibold">{mode.name}</p>
+          
           <div
-            onClick={handleProcessClick}
+            onClick={handleDownload}
             className="text-[16px] font-semibold bg-[#3549FF] opacity-90 flex items-center justify-center py-[8px] px-[80px] rounded-lg cursor-pointer"
           >
-            <p>Start Process</p>
+            <p>Download</p>
           </div>
         </div>
       )}
-       {processedImage && (
+      
+      
+       {processedImagePa && (
         <div className="flex justify-center mt-4">
           <Image
-            src={processedImage}
+            src={processedImagePa}
             alt="Processed Image"
-            width={800}
-            height={400}
+            width={400}
+            height={200}
             className="rounded-lg"
           />
         </div>

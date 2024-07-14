@@ -2,7 +2,7 @@ import { create } from 'zustand'
 
 export const imageStore = create((set) => ({
     imagePath:  {
-        path: "",
+        path: null,
     },
     updatePath: (imagePath) => set({
         imagePath: {
