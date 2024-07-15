@@ -84,14 +84,14 @@ def edge_tracking(image, weak=75, strong=255):
                     image[i, j] = 0
     return image
 
-def process_edge_detection(image_path, output_path):
+def process_edge_detection(image_path, output_path, kernel_size, sigma, low_threshold, high_threshold):
     image = cv2.imread(image_path)
     gray = rgb2gray(image)
-    blurred = gaussian_blur(gray)
+    blurred = gaussian_blur(gray, kernel_size, sigma)
 
     G, theta = sobel_operator(blurred)
     nms = non_max_suppression(G, theta)
-    thresh = threshold(nms, low=20, high=40)
+    thresh = threshold(nms, low_threshold, high_threshold)
     edges = edge_tracking(thresh)
 
     cv2.imwrite(output_path, edges)

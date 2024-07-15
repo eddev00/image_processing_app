@@ -5,11 +5,21 @@ import os
 from shutil import copyfile
 import uuid
 from pydantic import BaseModel
+from PIL import Image
+import numpy as np
+from erosion import create_kernel, erode_image, dilate_image, open_image, close_image
 from edge_detection import process_edge_detection
 
 class ProcessImageRequest(BaseModel):
     filename: str
     mode: str
+    kernel_size: int = 5
+    kernel_shape: str = 'rect'
+    iterations: int = 1
+    sigma: float = 1.0
+    low_threshold: int = 20
+    high_threshold: int = 40
+    morph_op: str = ''
 
 IMAGEDIR = "images/"
 PROCESSEDDIR = "processed/"
@@ -54,18 +64,42 @@ async def get_image(filename: str):
 @app.post("/process/")
 async def process_image(request: ProcessImageRequest):
     original_path = os.path.join(IMAGEDIR, request.filename)
-    processed_path = os.path.join(PROCESSEDDIR, request.filename)
+    unique_id = uuid.uuid4()
+    processed_filename = f"{unique_id}_{request.filename}"
+    processed_path = os.path.join(PROCESSEDDIR, processed_filename)
 
     if not os.path.exists(original_path):
         raise HTTPException(status_code=404, detail="Original file not found")
 
     if request.mode == 'Edge':
-        processed_path = os.path.join(PROCESSEDDIR, f"edge_{request.filename}")
-        processed_image_path = process_edge_detection(original_path, processed_path)
+        processed_image_path = process_edge_detection(
+            original_path,
+            processed_path,
+            request.kernel_size,
+            request.sigma,
+            request.low_threshold,
+            request.high_threshold
+        )
         print(f"Edge-detected image saved at: {processed_image_path}")
+    elif request.mode == 'MorphOp':
+        image = Image.open(original_path).convert('L')
+        image = np.array(image)
+        kernel = create_kernel(request.kernel_size, request.kernel_shape)
+
+        if request.morph_op == 'erosion':
+            processed_image = erode_image(image, kernel, request.iterations)
+        elif request.morph_op == 'dilation':
+            processed_image = dilate_image(image, kernel, request.iterations)
+        elif request.morph_op == 'opening':
+            processed_image = open_image(image, kernel, request.iterations)
+        elif request.morph_op == 'closing':
+            processed_image = close_image(image, kernel, request.iterations)
+        else:
+            raise HTTPException(status_code=400, detail="Invalid morphological operation")
+        
+        processed_image = Image.fromarray(processed_image)
+        processed_image.save(processed_path)
     else:
-        # For now, just copy the file to the processed directory for other modes
-        print(f"Copying {original_path} to {processed_path}")
         copyfile(original_path, processed_path)
 
     return {"processed_filename": os.path.basename(processed_path)}
