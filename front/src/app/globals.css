@@ -5,3 +5,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom Scrollbar Styles */
+::-webkit-scrollbar {
+    width: 10px; /* Width of the scrollbar */
+    height: 12px; /* Height of the scrollbar */
+    margin-right: 5px;
+  }
+  
+ 
+  
+  ::-webkit-scrollbar-thumb {
+    background: #2A2954; /* Color of the thumb */
+    border-radius: 10px; /* Roundness of the thumb */
+    cursor: pointer;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #2A2954; /* Color of the thumb when hovered */
+  }
+  
