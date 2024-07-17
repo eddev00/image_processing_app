@@ -16,7 +16,7 @@ import ProgressBar from "@badrap/bar-of-progress";
 import Link from "next/link";
 
 import github from "../../public/Octocat.svg";
-import linkedin from "../../public/Linkedln.svg";
+import linkedin from "../../public/LinkedIn.svg";
 
 import arrowupp from "../../public/arrow-up.svg";
 
