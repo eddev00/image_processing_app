@@ -46,6 +46,10 @@ if not os.path.exists(IMAGEDIR):
 if not os.path.exists(PROCESSEDDIR):
     os.makedirs(PROCESSEDDIR)
 
+@app.get("/")
+def home():
+    return {"message": "Hello World"}
+
 @app.post("/upload/")
 async def create_upload_file(file: UploadFile = File(...)):
     file.filename = f"{uuid.uuid4()}.jpg"
