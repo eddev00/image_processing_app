@@ -30,6 +30,7 @@ app = FastAPI()
 
 origins = [
     "https://image-processing-webapp-ggdfwh855-eddev00s-projects.vercel.app",
+    "https://backend-imageprocessing.onrender.com",
     "http://localhost:3000",
 ]
 
