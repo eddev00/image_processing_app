@@ -64,13 +64,13 @@ export default function Home() {
       formData.append("file", file);
 
       try {
-        const response = await fetch("http://localhost:8000/upload/", {
+        const response = await fetch("https://backend-imageprocessing.onrender.com/upload/", { // http://localhost:8000/upload/
           method: "POST",
           body: formData,
         });
 
         const data = await response.json();
-        const uploadedImagePath = `http://localhost:8000/images/${data.filename}`;
+        const uploadedImagePath = `https://backend-imageprocessing.onrender.com/images/${data.filename}`;
 
         updatePath(uploadedImagePath);
         console.log("Uploaded image:", imagePath);
@@ -124,13 +124,13 @@ export default function Home() {
       formData.append("file", file);
 
       try {
-        const response = await fetch("http://localhost:8000/upload/", {
+        const response = await fetch("https://backend-imageprocessing.onrender.com/upload/", {
           method: "POST",
           body: formData,
         });
 
         const data = await response.json();
-        const uploadedImagePath = `http://localhost:8000/images/${data.filename}`;
+        const uploadedImagePath = `https://backend-imageprocessing.onrender.com/images/${data.filename}`;
 
         updatePath(uploadedImagePath);
         console.log("Uploaded image:", uploadedImagePath);

@@ -78,7 +78,7 @@ const Sidebar = () => {
       };
 
       try {
-        const response = await fetch("http://localhost:8000/process/", {
+        const response = await fetch("https://backend-imageprocessing.onrender.com/process/", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -91,7 +91,7 @@ const Sidebar = () => {
         }
 
         const data = await response.json();
-        const processedImagePath = `http://localhost:8000/processed/${data.processed_filename}`;
+        const processedImagePath = `https://backend-imageprocessing.onrender.com/processed/${data.processed_filename}`;
 
         updatePr(processedImagePath);
         console.log("Processed image:", processedImagePa);
@@ -109,7 +109,7 @@ const Sidebar = () => {
       };
 
       try {
-        const response = await fetch("http://localhost:8000/process/", {
+        const response = await fetch("https://backend-imageprocessing.onrender.com/process/", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -122,7 +122,7 @@ const Sidebar = () => {
         }
 
         const data = await response.json();
-        const processedImagePath = `http://localhost:8000/processed/${data.processed_filename}`;
+        const processedImagePath = `https://backend-imageprocessing.onrender.com/processed/${data.processed_filename}`;
 
         updatePr(processedImagePath);
         console.log("Processed image:", processedImagePa);
@@ -144,7 +144,7 @@ const Sidebar = () => {
       };
 
       try {
-        const response = await fetch("http://localhost:8000/process/", {
+        const response = await fetch("https://backend-imageprocessing.onrender.com/process/", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -157,7 +157,7 @@ const Sidebar = () => {
         }
 
         const data = await response.json();
-        const processedImagePath = `http://localhost:8000/processed/${data.processed_filename}`;
+        const processedImagePath = `https://backend-imageprocessing.onrender.com/processed/${data.processed_filename}`;
 
         updatePr(processedImagePath);
         console.log("Processed image:", processedImagePa);
