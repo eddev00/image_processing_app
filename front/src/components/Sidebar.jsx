@@ -15,8 +15,8 @@ import { morphStore } from "../store/morphOp";
 import ProgressBar from "@badrap/bar-of-progress";
 import Link from "next/link";
 
-import github from "../../public/octocat.svg";
-import linkedin from "../../public/Linkedin.svg";
+import github from "../../public/Octocat.svg";
+import linkedin from "../../public/Linkedln.svg";
 
 import arrowupp from "../../public/arrow-up.svg";
 
