@@ -29,6 +29,7 @@ PROCESSEDDIR = "processed/"
 app = FastAPI()
 
 origins = [
+    "https://image-processing-webapp-ggdfwh855-eddev00s-projects.vercel.app",
     "http://localhost:3000",
 ]
 
