@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {images: {
-    domains: ['localhost'],
+    domains: ['localhost','backend-imageprocessing.onrender.com'],
   },};
 
 export default nextConfig;
