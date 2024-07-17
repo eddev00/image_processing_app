@@ -7,8 +7,9 @@ import uuid
 from pydantic import BaseModel
 from PIL import Image
 import numpy as np
-from erosion import create_kernel, erode_image, dilate_image, open_image, close_image
+from morphOperations import create_kernel, erode_image, dilate_image, open_image, close_image
 from edge_detection import process_edge_detection
+from skelitonize import skeletonize_image
 
 class ProcessImageRequest(BaseModel):
     filename: str
@@ -20,6 +21,7 @@ class ProcessImageRequest(BaseModel):
     low_threshold: int = 20
     high_threshold: int = 40
     morph_op: str = ''
+    threshold: int = 128
 
 IMAGEDIR = "images/"
 PROCESSEDDIR = "processed/"
@@ -99,6 +101,14 @@ async def process_image(request: ProcessImageRequest):
         
         processed_image = Image.fromarray(processed_image)
         processed_image.save(processed_path)
+
+    elif request.mode == 'Skeletonize':
+        processed_image_path = skeletonize_image(
+            original_path,
+            processed_path,
+            request.threshold
+        )
+        print(f"Skeletonized image saved at: {processed_image_path}")
     else:
         copyfile(original_path, processed_path)
 
