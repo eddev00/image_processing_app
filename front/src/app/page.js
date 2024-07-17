@@ -166,7 +166,7 @@ export default function Home() {
             className=" hover:bg-[#3549FF] hover:border-[#3549FF] gap-2 text-[16px] font-semibold bg-[#1E1E38] border border-[#8E8E9B] opacity-90 flex items-center justify-center py-[8px] px-[16px] rounded-lg cursor-pointer"
           >
             <Image src={neww} alt="New" width={20} height={20} />
-            <p>New entry</p>
+            <p>Upload</p>
             <input
               type="file"
               id="fileInput"
@@ -255,6 +255,21 @@ export default function Home() {
           >
             Processed Image{" "}
           </p>
+          <div className=" flex gap-2">
+          {processedImagePa && (  <div
+            onClick={imagePath ? handleUploadClick : null}
+            className=" hover:bg-[#3549FF] hover:border-[#3549FF] gap-2 text-[16px] font-semibold bg-[#1E1E38] border border-[#8E8E9B] opacity-90 flex items-center justify-center py-[8px] px-[16px] rounded-lg cursor-pointer"
+          >
+            <Image src={neww} alt="New" width={20} height={20} />
+            <p>New entry</p>
+            <input
+              type="file"
+              id="fileInput"
+              style={{ display: "none" }}
+              onChange={handleUploadButton}
+            />
+            
+          </div>)}
 
           <div
             onClick={mode.name && processedImagePa ? handleDownload : null}
@@ -266,6 +281,7 @@ export default function Home() {
           >
             <Image src={donwload} alt="Download" width={24} height={24} />
             <p>Download</p>
+          </div>
           </div>
         </div>
 

@@ -15,6 +15,9 @@ import { morphStore } from "../store/morphOp";
 import ProgressBar from "@badrap/bar-of-progress";
 import Link from "next/link";
 
+import github from "../../public/octocat.svg";
+import linkedin from "../../public/Linkedin.svg";
+
 import arrowupp from "../../public/arrow-up.svg";
 
 import edge from "../../public/edge.png";
@@ -26,6 +29,7 @@ const Sidebar = () => {
   const [lowThreshold, setLowThreshold] = useState(20);
   const [highThreshold, setHighThreshold] = useState(40);
   const [progress, setProgress] = useState(0);
+  const [threshold, setThreshold] = useState(150); // New parameter for skeletonize
 
   const mode = modeStore((state) => state.mode);
   const updateMode = modeStore((state) => state.updateMode);
@@ -71,6 +75,37 @@ const Sidebar = () => {
         kernel_shape: morphOp.settings.kernelShape,
         morph_op: morphOp.name,
         iterations: morphOp.settings.iterations,
+      };
+
+      try {
+        const response = await fetch("http://localhost:8000/process/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        });
+
+        if (!response.ok) {
+          throw new Error("Error processing image");
+        }
+
+        const data = await response.json();
+        const processedImagePath = `http://localhost:8000/processed/${data.processed_filename}`;
+
+        updatePr(processedImagePath);
+        console.log("Processed image:", processedImagePa);
+        progressBar.finish();
+      } catch (error) {
+        console.error("Error processing image:", error);
+        progressBar.finish();
+      }
+    }if (imagePath && mode.name === "Skeletonize") {
+      const filename = imagePath.split("/").pop();
+      const requestBody = {
+        filename: filename,
+        mode: mode.name,
+        threshold: threshold, // Pass the threshold parameter
       };
 
       try {
@@ -149,8 +184,8 @@ const Sidebar = () => {
 
   return (
     <div className="min-w-[300px] xl:w-[325px]">
-    <div className="fixed h-full text-white min-w-[300px] xl:w-[325px] bg-secondary pl-[24px]  pr-[16px] py-6  ">
-      <div className="">
+    <div className="fixed h-full text-white min-w-[300px] xl:w-[325px] bg-secondary pl-[24px]  pr-[16px] py-6 flex-col  ">
+      <div className=" h-full ">
         <Link href="/">
           {" "}
           <Image src={logo} alt="logo" className="ml-[16px] mb-14 " />
@@ -325,61 +360,48 @@ const Sidebar = () => {
           )}
         </div>
 
-        <div
-          className="mb-2 py-[12px] px-[16px] rounded-[10px] flex flex-col font-rubik font-medium text-[16px] button w-full bg-[#222143] gap-[16px]"
-          onClick={() => {
-            handleModeChange("Segmentation", {
-              exampleKey: "segmentationValue",
-            });
-            toggleMenu("Segmentation");
-          }}
-        >
-          <div className="rounded-[10px] flex items-center w-full gap-[16px] cursor-pointer">
-            <Image src={icon2} alt="logo" />
-            <p>Segmentation</p>
-            <Image
-              src={openMenu === "Segmentation" ? arrowup : arrowdown}
-              className="ml-auto"
-              alt="arrow"
-            />
-          </div>
-          {openMenu === "Segmentation" && (
-            <div className="">
-              <div
-                className={`mt-4 text-[14px] font-semibold flex items-center justify-center py-[8px] rounded-lg cursor-pointer bg-[#FF3544] opacity-50 cursor-not-allowed'}`}
-              >
-                <p>Unavailable now</p>
-              </div>
-            </div>
-          )}
-        </div>
+        
 
         <div
-          className="mb-2 py-[12px] px-[16px] rounded-[10px] flex flex-col font-rubik font-medium text-[16px] button w-full bg-[#222143] gap-[16px]"
-          onClick={() => {
-            handleModeChange("Skeletonize", { exampleKey: "skeletonizeValue" });
-            toggleMenu("Skeletonize");
-          }}
-        >
-          <div className="rounded-[10px] flex items-center w-full gap-[16px] cursor-pointer">
-            <Image src={icon3} alt="logo" />
-            <p>Skeletonize</p>
-            <Image
-              src={openMenu === "Skeletonize" ? arrowup : arrowdown}
-              className="ml-auto"
-              alt="arrow"
-            />
-          </div>
-          {openMenu === "Skeletonize" && (
-            <div className="">
-              <div
-                className={`mt-4 text-[14px] font-semibold flex items-center justify-center py-[8px] rounded-lg cursor-pointer bg-[#FF3544] opacity-50 cursor-not-allowed'}`}
-              >
-                <p>Unavailable now</p>
-              </div>
+            className="mb-2 py-[12px] px-[16px] rounded-[10px] flex flex-col font-rubik font-medium text-[16px] button w-full bg-[#222143] gap-[16px]"
+            onClick={() => {
+              handleModeChange("Skeletonize", { threshold });
+              toggleMenu("Skeletonize");
+            }}
+          >
+            <div className="rounded-[10px] flex items-center w-full gap-[16px] cursor-pointer">
+              <Image src={icon3} alt="logo" />
+              <p>Skeletonize</p>
+              <Image
+                src={openMenu === "Skeletonize" ? arrowup : arrowdown}
+                className="ml-auto"
+                alt="arrow"
+              />
             </div>
-          )}
-        </div>
+            {openMenu === "Skeletonize" && (
+              <div className="flex flex-col gap-3 mt-5">
+                <div className="flex justify-between items-center text-[14px] font-light">
+                  <p className="leading-0 inline opacity-70">Threshold</p>
+                  <input
+                    type="number"
+                    value={threshold}
+                    onChange={(e) => setThreshold(Number(e.target.value))}
+                    className="max-w-[104px] inline leading-0 border-r-[5px] border-[#393957] mt-1 text-[16px]  text-left bg-[#393957] py-2 pl-3 pr-3 rounded-[8px] cursor-pointer"
+                  />
+                </div>
+                <div
+                  onClick={imagePath ? handleProcessClick : null}
+                  className={`mt-4 text-[14px] font-semibold flex items-center justify-center py-[8px] rounded-lg cursor-pointer ${
+                    imagePath
+                      ? "bg-[#3549FF] opacity-90"
+                      : "bg-[#3549FF] opacity-50 cursor-not-allowed"
+                  }`}
+                >
+                  <p>Start Skeletonize</p>
+                </div>
+              </div>
+            )}
+          </div>
 
         <div className="mb-2 py-[12px] px-[16px] rounded-[10px] flex flex-col font-rubik font-medium text-[16px] button w-full bg-[#222143] gap-[16px] ">
           <div
@@ -421,7 +443,48 @@ const Sidebar = () => {
             </div>
           )}
         </div>
+        <div
+          className="mb-2 py-[12px] px-[16px] rounded-[10px] flex flex-col font-rubik font-medium text-[16px] button w-full bg-[#222143] gap-[16px]"
+          onClick={() => {
+            handleModeChange("Segmentation", {
+              exampleKey: "segmentationValue",
+            });
+            toggleMenu("Segmentation");
+          }}
+        >
+          <div className="rounded-[10px] flex items-center w-full gap-[16px] cursor-pointer">
+            <Image src={icon2} alt="logo" />
+            <p>Segmentation</p>
+            <Image
+              src={openMenu === "Segmentation" ? arrowup : arrowdown}
+              className="ml-auto"
+              alt="arrow"
+            />
+          </div>
+          {openMenu === "Segmentation" && (
+            <div className="">
+              <div
+                className={`mt-4 text-[14px] font-semibold flex items-center justify-center py-[8px] rounded-lg cursor-pointer bg-[#FF3544] opacity-50 cursor-not-allowed'}`}
+              >
+                <p>Unavailable now</p>
+              </div>
+            </div>
+          )}
+        </div>
+        
+        <div className="flex gap-10  items-center justify-between fixed bottom-5">
+          <div className=" font-semibold text-[18px]">Connect with me</div>
+          <div className="flex">
+          <Link href="https://github.com/eddev00">
+               <Image src={github} alt="logo"  width={40} height={40}/>
+          </Link>
+          <Link href="https://www.linkedin.com/in/mohamed-baarar/">
+               <Image src={linkedin} alt="logo"  width={40} height={40}/>
+          </Link>
+        </div></div>
+        
       </div>
+      
     </div></div>
   );
 };
