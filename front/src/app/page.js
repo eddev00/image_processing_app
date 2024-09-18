@@ -41,7 +41,7 @@ export default function Home() {
     delay: 100,
   });
   useEffect(() => {
-    console.log(API_URL + "/upload");
+    (API_URL + "/upload");
     // Scroll to the processed image when the path is updated
     if (processedImagePa) {
       processedImageRef.current.scrollIntoView({ behavior: "smooth" });
@@ -49,8 +49,8 @@ export default function Home() {
   }, [processedImagePa]);
   useEffect(() => {
     // Rerender when new imagePath
-    console.log("Image path updated:", imagePath);
-    console.log("Processed path updated:", processedImagePa);
+    ("Image path updated:", imagePath);
+    ("Processed path updated:", processedImagePa);
 
     
   }, [imagePath, processedImagePa, morphOp.name, processedImagePa]);
@@ -80,7 +80,7 @@ export default function Home() {
         const uploadedImagePath = `${API_URL}/images/${data.filename}`;
 
         updatePath(uploadedImagePath);
-        console.log("Uploaded image:", imagePath);
+        ("Uploaded image:", imagePath);
       } catch (error) {
         console.error("Error uploading image:", error);
       }
@@ -140,7 +140,7 @@ export default function Home() {
         const uploadedImagePath = `https://backend-imageprocessing.onrender.com/images/${data.filename}`;
 
         updatePath(uploadedImagePath);
-        console.log("Uploaded image:", uploadedImagePath);
+        ("Uploaded image:", uploadedImagePath);
         progressBar.finish();
       } catch (error) {
         console.error("Error uploading image:", error);

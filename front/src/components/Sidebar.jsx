@@ -49,8 +49,8 @@ const Sidebar = () => {
 
   const handleModeChange = (newMode, newSettings) => {
     updateMode(newMode, newSettings);
-    console.log("Mode changed to", mode.name);
-    console.log("Settings changed to", mode.settings);
+    ("Mode changed to", mode.name);
+    ("Settings changed to", mode.settings);
   };
 
   const toggleMenu = (menu) => {
@@ -94,7 +94,7 @@ const Sidebar = () => {
         const processedImagePath = `https://backend-imageprocessing.onrender.com/processed/${data.processed_filename}`;
 
         updatePr(processedImagePath);
-        console.log("Processed image:", processedImagePa);
+        ("Processed image:", processedImagePa);
         progressBar.finish();
       } catch (error) {
         console.error("Error processing image:", error);
@@ -125,7 +125,7 @@ const Sidebar = () => {
         const processedImagePath = `https://backend-imageprocessing.onrender.com/processed/${data.processed_filename}`;
 
         updatePr(processedImagePath);
-        console.log("Processed image:", processedImagePa);
+        ("Processed image:", processedImagePa);
         progressBar.finish();
       } catch (error) {
         console.error("Error processing image:", error);
@@ -160,7 +160,7 @@ const Sidebar = () => {
         const processedImagePath = `https://backend-imageprocessing.onrender.com/processed/${data.processed_filename}`;
 
         updatePr(processedImagePath);
-        console.log("Processed image:", processedImagePa);
+        ("Processed image:", processedImagePa);
         progressBar.finish();
       } catch (error) {
         console.error("Error processing image:", error);
