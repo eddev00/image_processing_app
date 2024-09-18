@@ -14,12 +14,14 @@ import { morphStore } from "../store/morphOp";
 
 import ProgressBar from "@badrap/bar-of-progress";
 
+// get api url from env.local
+const API_URL = process.env.DB_API_URL;
 
-const DB_URL = process.env.DB_API_URL ;
 
 export default function Home() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [progress, setProgress] = useState(0);
+  
 
   const mode = modeStore((state) => state.mode);
   const updateMode = modeStore((state) => state.updateMode);
@@ -67,13 +69,13 @@ export default function Home() {
       formData.append("file", file);
 
       try {
-        const response = await fetch(` ${DB_API_URL}/upload`, { // http://localhost:8000/upload/
+        const response = await fetch(`${API_URL}/upload`, { // http://localhost:8000/upload/
           method: "POST",
           body: formData,
         });
 
         const data = await response.json();
-        const uploadedImagePath = `${DB_API_URL}/images/${data.filename}`;
+        const uploadedImagePath = `${API_URL}/images/${data.filename}`;
 
         updatePath(uploadedImagePath);
         console.log("Uploaded image:", imagePath);
