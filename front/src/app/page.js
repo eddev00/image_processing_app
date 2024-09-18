@@ -15,7 +15,7 @@ import { morphStore } from "../store/morphOp";
 import ProgressBar from "@badrap/bar-of-progress";
 
 // get api url from env.local
-const API_URL = process.env.DB_API_URL;
+const API_URL =  process.env.NEXT_PUBLIC_API_URL || "https://backend-imageprocessing.onrender.com";
 
 
 export default function Home() {
@@ -41,6 +41,7 @@ export default function Home() {
     delay: 100,
   });
   useEffect(() => {
+    console.log(API_URL + "/upload");
     // Scroll to the processed image when the path is updated
     if (processedImagePa) {
       processedImageRef.current.scrollIntoView({ behavior: "smooth" });
@@ -55,6 +56,7 @@ export default function Home() {
   }, [imagePath, processedImagePa, morphOp.name, processedImagePa]);
 
   const handleImageUpload = async (event) => {
+    
     const file = event.target.files[0];
     updatePr(null);
     if (file) {
