@@ -14,6 +14,9 @@ import { morphStore } from "../store/morphOp";
 
 import ProgressBar from "@badrap/bar-of-progress";
 
+
+const DB_URL = process.env.DB_API_URL ;
+
 export default function Home() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [progress, setProgress] = useState(0);
@@ -64,13 +67,13 @@ export default function Home() {
       formData.append("file", file);
 
       try {
-        const response = await fetch("https://backend-imageprocessing.onrender.com/upload/", { // http://localhost:8000/upload/
+        const response = await fetch(` ${DB_API_URL}/upload`, { // http://localhost:8000/upload/
           method: "POST",
           body: formData,
         });
 
         const data = await response.json();
-        const uploadedImagePath = `https://backend-imageprocessing.onrender.com/images/${data.filename}`;
+        const uploadedImagePath = `${DB_API_URL}/images/${data.filename}`;
 
         updatePath(uploadedImagePath);
         console.log("Uploaded image:", imagePath);
