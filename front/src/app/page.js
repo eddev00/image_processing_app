@@ -243,7 +243,7 @@ export default function Home() {
         )}
       </div>
 
-      <hr class="w-full h-1 mx-auto  bg-gray-100 border-0 rounded  dark:bg-gray-700" />
+      <hr className="w-full h-1 mx-auto  bg-gray-100 border-0 rounded  dark:bg-gray-700" />
       <div className="flex flex-col gap-4 w-full justify-between">
         <div className="text-white flex justify-between items-center font-semibold">
           <p
