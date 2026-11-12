@@ -36,6 +36,8 @@ origins = [
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    # Vercel preview deployments get a new hashed subdomain on every push
+    allow_origin_regex=r"https://image-processing-webapp-[a-z0-9-]+-eddev00s-projects\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
