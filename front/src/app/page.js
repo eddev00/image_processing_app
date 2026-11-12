@@ -18,8 +18,36 @@ import ProgressBar from "@badrap/bar-of-progress";
 const API_URL =  process.env.NEXT_PUBLIC_API_URL || "https://backend-imageprocessing.onrender.com";
 
 
+// XHR instead of fetch: fetch cannot report upload progress
+const uploadFile = (file, onProgress) =>
+  new Promise((resolve, reject) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${API_URL}/upload/`);
+    xhr.responseType = "json";
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        onProgress(Math.round((e.loaded / e.total) * 100));
+      }
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300 && xhr.response?.filename) {
+        resolve(xhr.response);
+      } else {
+        reject(new Error(`Upload failed (${xhr.status})`));
+      }
+    };
+    xhr.onerror = () => reject(new Error("Network error during upload"));
+    xhr.send(formData);
+  });
+
 export default function Home() {
   const [selectedImage, setSelectedImage] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadPercent, setUploadPercent] = useState(0);
+  const [uploadError, setUploadError] = useState(null);
   const [progress, setProgress] = useState(0);
   
 
@@ -55,35 +83,33 @@ export default function Home() {
     
   }, [imagePath, processedImagePa, morphOp.name, processedImagePa]);
 
-  const handleImageUpload = async (event) => {
-    
+  const handleFileSelected = async (event) => {
     const file = event.target.files[0];
+    // Reset so picking the same file again still fires onChange
+    event.target.value = "";
+    if (!file || isUploading) return;
+
     updatePr(null);
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setSelectedImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+    setUploadError(null);
+    setUploadPercent(0);
+    setIsUploading(true);
+    progressBar.start();
 
-      // Automatically submit the file after it's selected
-      const formData = new FormData();
-      formData.append("file", file);
+    // Show a local preview right away while the file is in flight
+    if (selectedImage) URL.revokeObjectURL(selectedImage);
+    setSelectedImage(URL.createObjectURL(file));
 
-      try {
-        const response = await fetch(`${API_URL}/upload`, { // http://localhost:8000/upload/
-          method: "POST",
-          body: formData,
-        });
-
-        const data = await response.json();
-        const uploadedImagePath = `${API_URL}/images/${data.filename}`;
-
-        updatePath(uploadedImagePath);
-        ("Uploaded image:", imagePath);
-      } catch (error) {
-        console.error("Error uploading image:", error);
-      }
+    try {
+      const data = await uploadFile(file, setUploadPercent);
+      updatePath(`${API_URL}/images/${data.filename}`);
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      setUploadError("Upload failed. Please try again.");
+      // Nothing uploaded yet: bring the dropzone back
+      if (!imagePath) setSelectedImage(null);
+    } finally {
+      setIsUploading(false);
+      progressBar.finish();
     }
   };
 
@@ -113,42 +139,6 @@ export default function Home() {
     }
   };
 
-  const handleUploadButton = async (event) => {
-    updatePr(null);
-
-    const file = event.target.files[0];
-    setProgress(0);
-    progressBar.start();
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setSelectedImage(reader.result);
-      };
-      reader.readAsDataURL(file);
-
-      // Automatically submit the file after it's selected
-      const formData = new FormData();
-      formData.append("file", file);
-
-      try {
-        const response = await fetch("https://backend-imageprocessing.onrender.com/upload/", {
-          method: "POST",
-          body: formData,
-        });
-
-        const data = await response.json();
-        const uploadedImagePath = `https://backend-imageprocessing.onrender.com/images/${data.filename}`;
-
-        updatePath(uploadedImagePath);
-        ("Uploaded image:", uploadedImagePath);
-        progressBar.finish();
-      } catch (error) {
-        console.error("Error uploading image:", error);
-        progressBar.finish();
-      }
-    }
-  };
-
   const handleUploadClick = () => {
     document.getElementById("fileInput").click();
   };
@@ -169,16 +159,24 @@ export default function Home() {
           <div className="flex gap-2">
         
           {selectedImage && (  <div
-            onClick={imagePath ? handleUploadClick : null}
-            className=" hover:bg-[#3549FF] hover:border-[#3549FF] gap-2 text-[16px] font-semibold bg-[#1E1E38] border border-[#8E8E9B] opacity-90 flex items-center justify-center py-[8px] px-[16px] rounded-lg cursor-pointer"
+            onClick={imagePath && !isUploading ? handleUploadClick : null}
+            className={` gap-2 text-[16px] font-semibold bg-[#1E1E38] border border-[#8E8E9B] flex items-center justify-center py-[8px] px-[16px] rounded-lg ${
+              isUploading
+                ? "opacity-50 cursor-not-allowed"
+                : "opacity-90 cursor-pointer hover:bg-[#3549FF] hover:border-[#3549FF]"
+            }`}
           >
-            <Image src={neww} alt="New" width={20} height={20} />
-            <p>Upload</p>
+            {isUploading ? (
+              <span className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+            ) : (
+              <Image src={neww} alt="New" width={20} height={20} />
+            )}
+            <p>{isUploading ? "Uploading…" : "Upload"}</p>
             <input
               type="file"
               id="fileInput"
               style={{ display: "none" }}
-              onChange={handleUploadButton}
+              onChange={handleFileSelected}
             />
             
           </div>)}
@@ -192,7 +190,7 @@ export default function Home() {
               type="file"
               id="fileInput"
               style={{ display: "none" }}
-              onChange={handleUploadButton}
+              onChange={handleFileSelected}
             />
           </div>)}
           
@@ -231,12 +229,49 @@ export default function Home() {
               id="dropzone-file"
               type="file"
               className="hidden"
-              onChange={handleImageUpload}
+              onChange={handleFileSelected}
             />
           </label>
         )}
 
-        {imagePath && (
+        {uploadError && (
+          <p role="alert" className="text-[#FF3544] text-sm font-medium">
+            {uploadError}
+          </p>
+        )}
+
+        {isUploading && selectedImage && (
+          <div className="flex justify-center mt-4">
+            <div className="relative min-h-[200px] min-w-[260px]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={selectedImage}
+                alt="Preview of the image being uploaded"
+                className="rounded-lg h-[70vh] w-auto opacity-40"
+              />
+              <div
+                role="status"
+                aria-live="polite"
+                className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white"
+              >
+                <span className="w-10 h-10 rounded-full border-4 border-white/30 border-t-white animate-spin" />
+                <p className="text-[16px] font-semibold">
+                  {uploadPercent < 100
+                    ? `Uploading… ${uploadPercent}%`
+                    : "Finishing up…"}
+                </p>
+                <div className="w-48 h-1.5 rounded-full bg-white/20 overflow-hidden">
+                  <div
+                    className="h-full bg-[#3549FF] transition-all duration-200"
+                    style={{ width: `${uploadPercent}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {!isUploading && imagePath && (
           <div className="flex justify-center mt-4">
             <Image
               src={imagePath}
@@ -273,7 +308,7 @@ export default function Home() {
               type="file"
               id="fileInput"
               style={{ display: "none" }}
-              onChange={handleUploadButton}
+              onChange={handleFileSelected}
             />
             
           </div>)}
